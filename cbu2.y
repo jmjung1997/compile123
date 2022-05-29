@@ -44,49 +44,46 @@ void	assgnstmt(int, int);
 void	numassgn(int, int);
 void	addstmt(int, int, int);
 void	substmt(int, int, int);
-void	mulstmt(int, int, int);
-void	divstmt(int, int, int);
-int	insertsym(char *);
+int		insertsym(char *);
 %}
 
-%token	ADD SUB ASSGN ID NUM STMTEND START END ID2 MUL DIV
+%token	ADD SUB ASSGN ID NUM STMTEND START END ID2  MUL DIV
 
 
 
 %%
-program	: 		START stmt_list END	{ if (errorcnt==0) {codegen($2); dwgen();} }
+program	: START stmt_list END	{ if (errorcnt==0) {codegen($2); dwgen();} }
 		;
 
-stmt_list	: 		stmt_list stmt 	{$$=MakeListTree($1, $2);}
-		|	stmt		{$$=MakeListTree(NULL, $1);}
+stmt_list: 	stmt_list stmt 	{$$=MakeListTree($1, $2);}
+		|	stmt			{$$=MakeListTree(NULL, $1);}
 		| 	error STMTEND	{ errorcnt++; yyerrok;}
 		;
 
-stmt	: 		ID ASSGN expr STMTEND	{ $1->token = ID2; $$=MakeOPTree(ASSGN, $1, $3);}
+stmt	: 	ID ASSGN expr STMTEND	{ $1->token = ID2; $$=MakeOPTree(ASSGN, $1, $3);}
 		;
 
-expr	: 		expr ADD term1	{ $$=MakeOPTree(ADD, $1, $3); }
-		|	expr SUB term1	{ $$=MakeOPTree(SUB, $1, $3); }
-		|	term1
-		;
-
-term1	:		term DIV term1	{ $$=MakeOPTree(DIV, $1, $3); }
-		|	term MUL term1	{ $$=MakeOPTree(MUL, $1, $3);}
+expr	: 	expr ADD term	{ $$=MakeOPTree(ADD, $1, $3); }
+		|	expr SUB term	{ $$=MakeOPTree(SUB, $1, $3); }
 		|	term
 		;
-term	:		ID
-		|	NUM
+
+
+term	:	ID		{ /* ID node is created in lex */ }
+		|	NUM		{ /* NUM node is created in lex */ }
 		;
+
+
 %%
 int main(int argc, char *argv[]) 
 {
-	printf("\nsample CBU compiler v1.1\n");
-	printf("(C) Copyright by Seong Mok Lee (demy176@cbnu.ac.kr), 2021.\n");
+	printf("\nsample CBU compiler v2.0\n");
+	printf("(C) Copyright by Jae Sung Lee (jasonlee@cbnu.ac.kr), 2022.\n");
 	
 	if (argc == 2)
 		yyin = fopen(argv[1], "r");
 	else {
-		printf("Usage: cbu inputfile\noutput file is 'a.asm'\n");
+		printf("Usage: cbu2 inputfile\noutput file is 'a.asm'\n");
 		return(0);
 		}
 		
@@ -184,12 +181,6 @@ void prtcode(int token, int val)
 	case SUB:
 		fprintf(fp, "-\n");
 		break;
-  	 case MUL:
-      		fprintf(fp, "*\n");
-      		break;
-   	case DIV:
-      		fprintf(fp, "/\n");
-      		break;
 	case ASSGN:
 		fprintf(fp, ":=\n");
 		break;
